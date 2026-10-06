@@ -812,8 +812,9 @@ function update(dt) {
         P.cap -= 10;
         P.shootCD = 0.18;
         P.shootT = 0.15;
-        shots.push({ x: P.face > 0 ? P.x + P.w : P.x - 14, y: P.y + 12, w: 14, h: 12,
-                     vx: P.face * 480 + P.vx * 0.3, life: 0.75, t: 0 });
+        // startet an der Hand und fällt in einem flachen Bogen, damit er auch Bugs am Boden trifft
+        shots.push({ x: P.face > 0 ? P.x + P.w : P.x - 14, y: P.y + 16, w: 14, h: 12,
+                     vx: P.face * 460 + P.vx * 0.3, vy: -30, life: 0.9, t: 0 });
         P.sx = 1.12; P.sy = 0.92;
         sfx.shoot();
       } else {
@@ -826,7 +827,9 @@ function update(dt) {
 
   // --- Haken-Geschosse -------------------------------------------------------
   for (const s of shots) {
+    s.vy += 180 * dt;
     s.x += s.vx * dt;
+    s.y += s.vy * dt;
     s.t += dt;
     s.life -= dt;
     let hit = false;
@@ -2150,7 +2153,8 @@ function drawWorld() {
   for (const s of shots) {
     ctx.save();
     ctx.translate(s.x + 7, s.y + 6);
-    ctx.rotate(Math.sin(s.t * 30) * 0.15);
+    // in Flugrichtung neigen, dazu ein leichtes Wackeln
+    ctx.rotate(Math.atan2(s.vy, Math.abs(s.vx)) * Math.sign(s.vx) + Math.sin(s.t * 30) * 0.1);
     drawCheck(0, 0, 14, GREEN, '#ffffff');
     ctx.restore();
   }
